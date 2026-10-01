@@ -10,7 +10,7 @@ authors:
 version: "1.0"
 date-released: "2026-10-01"
 license: MIT
-repository-code: "https://github.com/anshM123/SimGDA-Divergence"
+repository-code: "https://github.com/anshM123/SIMGDA-Divergence"
 keywords:
   - "minimax optimization"
   - "anchoring"
@@ -29,4 +29,4 @@ preferred-citation:
       given-names: Aryan
   year: 2026
   month: 10
-  url: "https://github.com/anshM123/SimGDA-Divergence"
+  url: "https://github.com/anshM123/SIMGDA-Divergence"
