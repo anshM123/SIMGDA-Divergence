@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite the preprint below."
+title: "Anchored simultaneous gradient descent diverges on bilinear problems when the step exponent is below one half"
+type: software
+authors:
+  - family-names: Mishra
+    given-names: Ansh
+  - family-names: Senthilkumar
+    given-names: Aryan
+version: "1.0"
+date-released: "2026-10-01"
+license: MIT
+repository-code: "https://github.com/anshM123/SimGDA-Divergence"
+keywords:
+  - "minimax optimization"
+  - "anchoring"
+  - "last-iterate convergence"
+  - "Formal Conjectures"
+  - "Lean 4"
+  - "formal verification"
+preferred-citation:
+  type: article
+  status: preprint
+  title: "Anchored simultaneous gradient descent diverges on bilinear problems when the step exponent is below one half"
+  authors:
+    - family-names: Mishra
+      given-names: Ansh
+    - family-names: Senthilkumar
+      given-names: Aryan
+  year: 2026
+  month: 10
+  url: "https://github.com/anshM123/SimGDA-Divergence"

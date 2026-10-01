@@ -1,0 +1,26 @@
+{
+  "title": "Anchored simultaneous gradient descent diverges on bilinear problems when the step exponent is below one half",
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "description": "Ryu, Yuan and Yin introduced anchored simultaneous gradient descent (SimGD-A) for convex-concave minimax problems, proved a last-iterate rate for step exponents p in (1/2, 1), and remarked that simple tests on bilinear examples show divergence when p < 1/2. We prove this: for every p in (0, 1/2) and gamma > 0, and for every rho in an open dense subset of (0, 1], the method diverges on the bilinear problem L(x, y) = rho x y started at (1, 0), with the gradient norm growing like exp(kappa k^(1-2p)). The proof reduces the iteration to a scalar complex recursion, isolates one complex constant that decides between divergence and convergence, and shows that it cannot vanish on an interval by a boundary uniqueness argument for holomorphic functions. This settles the statement divergence_for_p_lt_half in Google DeepMind's Formal Conjectures repository. The repository contains the paper (LaTeX source and PDF), numerical checks and logs.",
+  "creators": [
+    {
+      "name": "Mishra, Ansh"
+    },
+    {
+      "name": "Senthilkumar, Aryan"
+    }
+  ],
+  "license": "mit",
+  "access_right": "open",
+  "keywords": [
+    "minimax optimization",
+    "anchoring",
+    "last-iterate convergence",
+    "Formal Conjectures",
+    "Lean 4",
+    "formal verification"
+  ],
+  "version": "1.0",
+  "language": "eng"
+}

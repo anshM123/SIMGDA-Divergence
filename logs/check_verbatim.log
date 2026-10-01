@@ -1,0 +1,15 @@
+reference git blob: a352fef41e5ec8a4ae7d8f2d07340712497f46f1 OK
+variable (n m : ℕ)                            verbatim in Defs.lean: True
+abbrev E_n                                    verbatim in Defs.lean: True
+abbrev F_m                                    verbatim in Defs.lean: True
+abbrev Z_space                                verbatim in Defs.lean: True
+noncomputable def toProd                      verbatim in Defs.lean: True
+structure State                               verbatim in Defs.lean: True
+noncomputable def F_operator                  verbatim in Defs.lean: True
+noncomputable def IsSaddlePoint               verbatim in Defs.lean: True
+noncomputable def step                        verbatim in Defs.lean: True
+noncomputable def coefficients_schedule       verbatim in Defs.lean: True
+noncomputable def coefficients_schedule_p     verbatim in Defs.lean: True
+statement of divergence_for_p_lt_half verbatim in Solution.lean: True
+statement of divergence_for_p_lt_half verbatim in CheckAnswer.lean: True
+ALL OK

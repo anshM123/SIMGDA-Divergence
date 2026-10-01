@@ -1,0 +1,253 @@
+\documentclass[11pt]{amsart}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\re}{\operatorname{Re}}
+\newcommand{\im}{\operatorname{Im}}
+\newcommand{\lean}[1]{\texttt{#1}}
+\setlength{\emergencystretch}{3em}
+
+\begin{document}
+
+\title[SimGD-A below one half]{Anchored simultaneous gradient descent diverges on bilinear problems when the step exponent is below one half}
+
+\author{Ansh Mishra}
+\author{Aryan Senthilkumar}
+
+\date{October 2026}
+
+\begin{abstract}
+For smooth convex--concave minimax problems, Ryu, Yuan and Yin introduced anchored simultaneous gradient descent,
+$z_{k+1}=z_k-\frac{1-p}{(k+1)^p}G(z_k)+\frac{(1-p)\gamma}{k+1}(z_0-z_k)$, proved the last-iterate rate $\|G(z_k)\|^2=O(k^{-(2-2p)})$ for $p\in(1/2,1)$, and remarked that simple tests on bilinear examples show divergence when $p<1/2$.
+We prove this.
+For every $p\in(0,1/2)$ and $\gamma>0$, and for every $\rho$ in an open dense subset of $(0,1]$, the method diverges on the bilinear problem $L(x,y)=\rho xy$ started at $z_0=(1,0)$: $\|G(z_k)\|$ grows like $\exp(\kappa k^{1-2p})$.
+The proof reduces the iteration to a scalar complex recursion, isolates one complex constant $\Lambda(\rho)$ that decides between divergence and convergence, and shows that $\Lambda$ cannot vanish on an interval, using a boundary uniqueness argument for holomorphic functions.
+This settles the statement \lean{divergence\_for\_p\_lt\_half} in Google DeepMind's Formal Conjectures repository, and we have formalized the proof in Lean~4 with Mathlib.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+Let $L(x,y)$ be a differentiable convex--concave function on $\R^n\times\R^m$ and let $G(z)=(\nabla_xL(z),-\nabla_yL(z))$ for $z=(x,y)$.
+Then $G$ is monotone, and we assume that it is $K$-Lipschitz and that $L$ has a saddle point.
+Ryu, Yuan and Yin \cite{RYY} proposed the anchored simultaneous gradient descent method
+\begin{equation}\label{eq:simgda}
+z_{k+1}=z_k-\alpha_k\,G(z_k)+\beta_k\,(z_0-z_k),\qquad \alpha_k=\frac{1-p}{K(k+1)^p},\quad \beta_k=\frac{(1-p)\gamma}{k+1},
+\end{equation}
+and proved that $\|G(z_k)\|^2=O(k^{-(2-2p)})$ for $p\in(1/2,1)$ and $\gamma\ge2$ \cite[Theorem~3]{RYY}.
+(We include the Lipschitz constant $K$ in the step, as the formal statement \cite{FC} does; \cite{RYY} normalizes $K=1$.)
+Surina et al.\ \cite{Surina} proved the rate $O(1/k)$ in the boundary case $p=1/2$, with a formal proof in Lean.
+For smaller exponents, \cite[\S4.2]{RYY} contains only the remark that \emph{simple tests on bilinear examples show divergence when $p<1/2$}.
+The Formal Conjectures repository \cite{FC} states this as an open problem: for $p\in(0,1/2)$ and $\gamma\ge2$, show that there is a problem as above on which \eqref{eq:simgda} does not achieve $\|G(z_k)\|^2=O(1/k)$.
+We prove a stronger statement.
+
+\begin{theorem}\label{thm:main}
+Let $p\in(0,1/2)$, $\gamma>0$ and $K>0$.
+For $0<\rho\le K$ let $L_\rho(x,y)=\rho xy$ on $\R\times\R$, and let $(z_k)$ be the iterates \eqref{eq:simgda} with $z_0=(1,0)$.
+There is a set $A\subseteq(0,K]$, open and dense in $(0,K]$, such that for every $\rho\in A$ there are $c,\kappa>0$ with
+\[
+\|G(z_k)\|\ \ge\ c\,\exp\!\bigl(\kappa\,k^{1-2p}\bigr)\qquad\text{for all large }k .
+\]
+In particular $\|G(z_k)\|^2$ is not $O(k^{-\epsilon})$ for any $\epsilon$, and the iterates diverge.
+\end{theorem}
+
+The function $L_\rho$ is convex--concave, $G(x,y)=(\rho y,-\rho x)$ is monotone and $\rho$-Lipschitz, hence $K$-Lipschitz, and $(0,0)$ is the saddle point.
+So Theorem~\ref{thm:main} settles the formal statement; see Section~\ref{sec:formal}.
+
+The difficulty is a possible cancellation.
+For every $\rho$ the iteration has a one-parameter family of solutions that grow like $\exp(\kappa k^{1-2p})$, and one solution that converges to the saddle point.
+Whether the actual run, started at the anchor, is the convergent one is decided by a single complex number $\Lambda(\rho)$, and the run diverges exactly when $\Lambda(\rho)\neq0$.
+Numerically $\Lambda(\rho)\neq0$ at every point we computed (Section~\ref{sec:numerics}), but we know no closed form for it.
+We show that $\Lambda$ extends to a holomorphic function in a half-plane that is continuous up to the real axis and is not identically zero, and conclude that it cannot vanish on an interval.
+
+\section{Reduction to a complex recursion}
+
+Identify $(x,y)\in\R^2$ with $w=x+iy\in\C$.
+Then $G(x,y)=(\rho y,-\rho x)$ corresponds to $w\mapsto-i\rho w$, and with $w_k=x_k+iy_k$, \eqref{eq:simgda} becomes
+\[
+w_{k+1}=w_k+i\rho\alpha_kw_k+\beta_k(w_0-w_k).
+\]
+Put $r=\rho/K\in(0,1]$, $a_k=(1-p)(k+1)^{-p}$ and $b_k=(1-p)\gamma/(k+1)$, so that $\rho\alpha_k=ra_k$ and $\beta_k=b_k$.
+Since $w_0=1$,
+\begin{equation}\label{eq:rec}
+w_{k+1}=m_k(r)\,w_k+b_k,\qquad m_k(\zeta)=1-b_k+i\zeta a_k,\qquad w_0=1,
+\end{equation}
+and $\|G(z_k)\|=\rho\,|w_k|$.
+For $\zeta\in\C$ let $\Phi_k(\zeta)=\prod_{s<k}m_s(\zeta)$.
+Dividing \eqref{eq:rec} by $\Phi_{k+1}(r)$ gives $w_{k+1}/\Phi_{k+1}=w_k/\Phi_k+b_k/\Phi_{k+1}$, hence
+\begin{equation}\label{eq:closed}
+w_k=\Phi_k(r)\Bigl(1+\sum_{s<k}\frac{b_s}{\Phi_{s+1}(r)}\Bigr),
+\end{equation}
+provided no $\Phi_k(r)$ vanishes; this holds since $\im m_s(r)=ra_s>0$.
+
+\section{Growth of the products}
+
+Fix $\delta\in(0,1]$ and let $R_\delta=\{\zeta\in\C:\delta\le\re\zeta\le1,\ \im\zeta\le0\}$.
+Write $c=(1-p)\gamma$.
+
+\begin{lemma}\label{lem:growth}
+There are $C_\delta,\kappa_\delta>0$ such that $|\Phi_k(\zeta)|\ge C_\delta\exp(\kappa_\delta k^{1-2p})$ for all $\zeta\in R_\delta$ and $k\ge0$.
+\end{lemma}
+
+\begin{proof}
+For $\zeta\in R_\delta$ we have $m_s(\zeta)=(1-b_s-a_s\im\zeta)+ia_s\re\zeta$, so $|m_s(\zeta)|\ge\delta a_s>0$.
+Let $s_1$ be such that $b_s\le1$ and $\delta^2a_s^2\ge4b_s$ for all $s\ge s_1$; it exists because $b_s\to0$ and $a_s^2/b_s=(1-p)^2(s+1)^{1-2p}/c\to\infty$, as $2p<1$.
+For $s\ge s_1$ the real part satisfies $1-b_s-a_s\im\zeta\ge1-b_s\ge0$, so
+\[
+|m_s(\zeta)|^2\ge(1-b_s)^2+\delta^2a_s^2\ge1-2b_s+\delta^2a_s^2\ge1+\tfrac12\delta^2a_s^2 .
+\]
+Since $\delta^2a_s^2\le1$ and $\log(1+x)\ge x/2$ on $[0,1]$, we get $\log|m_s(\zeta)|\ge\delta^2a_s^2/8$.
+For $s<k$ we have $(s+1)^{-2p}\ge k^{-2p}$, so for $k\ge 2s_1$
+\[
+\log|\Phi_k(\zeta)|\ \ge\ \sum_{s<s_1}\log(\delta a_s)+\frac{\delta^2(1-p)^2}{8}\,(k-s_1)\,k^{-2p}
+\ \ge\ -C'+\frac{\delta^2(1-p)^2}{16}\,k^{1-2p}.
+\]
+Adjusting the constant covers the finitely many $k<2s_1$.
+\end{proof}
+
+Consequently $b_s/|\Phi_{s+1}(\zeta)|\le M_s:=cC_\delta^{-1}(s+1)^{-1}\exp(-\kappa_\delta(s+1)^{1-2p})$ on $R_\delta$, and $\sum_sM_s<\infty$.
+By the Weierstrass M-test the function
+\begin{equation}\label{eq:Lambda}
+\Lambda(\zeta)=1+\sum_{s\ge0}\frac{b_s}{\Phi_{s+1}(\zeta)}
+\end{equation}
+is continuous on $R_\delta$ and bounded there by $1+\sum_sM_s$.
+Each term is holomorphic in the interior of $R_\delta$, where $\Phi_{s+1}$ has no zeros, and the convergence is uniform there, so $\Lambda$ is holomorphic on the interior of $R_\delta$.
+As $\delta\in(0,1]$ is arbitrary, $\Lambda$ is continuous on $\{0<\re\zeta\le1,\ \im\zeta\le0\}$ and holomorphic on $U=\{0<\re\zeta<1,\ \im\zeta<0\}$.
+
+\begin{lemma}\label{lem:dichotomy}
+Let $r\in(0,1]$ with $\Lambda(r)\neq0$.
+Then $|w_k|\ge\frac12|\Lambda(r)|\,C_r\exp(\kappa_r k^{1-2p})$ for all large $k$.
+\end{lemma}
+
+\begin{proof}
+By \eqref{eq:closed}, $w_k=\Phi_k(r)(\Lambda(r)-\tau_k)$ with $\tau_k=\sum_{s\ge k}b_s/\Phi_{s+1}(r)\to0$.
+For large $k$ we have $|\tau_k|\le|\Lambda(r)|/2$, and Lemma~\ref{lem:growth} with $\delta=r$ bounds $|\Phi_k(r)|$ from below.
+\end{proof}
+
+\begin{remark}\label{rem:convergent}
+If $\Lambda(r)=0$, then $w_k=-\Phi_k(r)\tau_k\to0$.
+Indeed, for $k\ge s_1$ (with $\delta=r$) the proof of Lemma~\ref{lem:growth} gives $|\Phi_{s+1}(r)/\Phi_k(r)|\ge\exp\bigl(\tfrac{r^2}{8}\sum_{j=k}^{s}a_j^2\bigr)$.
+Splitting $\sum_{s\ge k}b_s|\Phi_k(r)/\Phi_{s+1}(r)|$ at $s=2k$ shows that $|w_k|=O(k^{2p-1})$.
+This estimate uses only the moduli of the factors $m_j$; taking their rotation into account, one expects the order $k^{p-1}$.
+So the single constant $\Lambda(r)$ decides between divergence and convergence, and growth estimates alone cannot exclude the convergent case.
+\end{remark}
+
+\section{The constant $\Lambda$ does not vanish on an interval}
+
+\begin{lemma}\label{lem:limit}
+For fixed $x\in(0,1)$, $\Lambda(x-iy)\to1$ as $y\to+\infty$.
+\end{lemma}
+
+\begin{proof}
+Each term of \eqref{eq:Lambda} tends to $0$, since $|m_0(x-iy)|\ge a_0y-|1-b_0|\to\infty$ and the other factors are bounded below on $R_x$ by the proof of Lemma~\ref{lem:growth}.
+The terms are dominated by the summable $M_s$, so the series tends to $0$.
+\end{proof}
+
+\begin{lemma}[boundary uniqueness]\label{lem:unique}
+Let $D\subset\C$ be an open disk centred on the real axis, $D^-=D\cap\{\im\zeta<0\}$ and $I=D\cap\R$.
+Let $f$ be continuous on $D^-\cup I$, holomorphic on $D^-$, and $f=0$ on $I$.
+Then $f=0$ on $D^-$.
+\end{lemma}
+
+\begin{proof}
+Define $g=f$ on $D^-\cup I$ and $g=0$ on $D\cap\{\im\zeta>0\}$.
+Then $g$ is continuous on $D$.
+Let $Q\subset D$ be a closed rectangle with sides parallel to the axes.
+If $Q$ lies on one side of the real axis, possibly touching it, then $\int_{\partial Q}g=0$: on the lower side by Cauchy's theorem for functions continuous on a closed rectangle and holomorphic in its interior, and on the upper side trivially.
+Otherwise cut $Q$ along the real axis into $Q^-$ and $Q^+$.
+Then $\int_{\partial Q}g=\int_{\partial Q^-}g+\int_{\partial Q^+}g=0$, because the two integrals along the cut cancel.
+(They even vanish separately, since $g=0$ on $I$.)
+By Morera's theorem $g$ is holomorphic on $D$.
+It vanishes on the nonempty open set $D\cap\{\im\zeta>0\}$, so $g\equiv0$ on $D$ by the identity theorem.
+\end{proof}
+
+\begin{proposition}\label{prop:nonvanishing}
+$\Lambda$ does not vanish identically on any interval $[x_1,x_2]\subseteq(0,1]$ with $x_1<x_2$.
+Consequently $\{r\in(0,1]:\Lambda(r)\neq0\}$ is open and dense in $(0,1]$.
+\end{proposition}
+
+\begin{proof}
+Suppose $\Lambda=0$ on $[x_1,x_2]$.
+Apply Lemma~\ref{lem:unique} to $\Lambda$ on the disk $D$ with diameter $[x_1,x_2]$; note that $D^-\cup I\subseteq R_{x_1}$, where $\Lambda$ is continuous, and $D^-\subseteq U$.
+Hence $\Lambda=0$ on the nonempty open set $D^-\subseteq U$.
+As $U$ is connected, $\Lambda\equiv0$ on $U$ by the identity theorem, which contradicts Lemma~\ref{lem:limit}.
+The set where $\Lambda\neq0$ is open by continuity of $\Lambda$ on $(0,1]$, and dense by what we have shown.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+Let $A=\{\rho\in(0,K]:\Lambda(\rho/K)\neq0\}$, which is open and dense in $(0,K]$ by Proposition~\ref{prop:nonvanishing}.
+For $\rho\in A$, Lemma~\ref{lem:dichotomy} gives $\|G(z_k)\|=\rho|w_k|\ge c\exp(\kappa k^{1-2p})$ for large $k$.
+\end{proof}
+
+\begin{remark}
+More is true.
+$\Lambda$ is bounded on $R_\delta$, so by the Lusin--Privalov uniqueness theorem (after a conformal map of the interior of $R_\delta$ onto the disk) its boundary values cannot vanish on a set of positive measure.
+Hence the method diverges for almost every $\rho\in(0,K]$.
+\end{remark}
+
+\section{Numerical illustration}\label{sec:numerics}
+
+The following values of $\Lambda(r)$ were computed from \eqref{eq:Lambda}, summed until $|\Phi_k|$ exceeds $e^{700}$, with $T=4\cdot10^5$ iterations.
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$p$ & $\gamma$ & $\Lambda(1)$ & $\Lambda(1/2)$\\
+\midrule
+$0.10$ & $2$ & $-0.0617-0.2693i$ & $\phantom{-}1.9716-0.5893i$\\
+$0.25$ & $2$ & $-0.0654-0.0579i$ & $\phantom{-}5.9787+1.1706i$\\
+$0.25$ & $5$ & $-0.0159-0.1978i$ & $\phantom{-}41.675+54.463i$\\
+$0.30$ & $2$ & $-0.0828+0.0781i$ & $\phantom{-}7.6550+3.3841i$\\
+\bottomrule
+\end{tabular}
+\end{center}
+For $p=0.25$, $\gamma=2$ and $r=1$ the iterate reaches $|w_k|\approx10^{145}$ at $k=4\cdot10^5$.
+For $p$ close to $1/2$ the growth $\exp(\kappa k^{1-2p})$ starts only after very many iterations, which explains why divergence is hard to observe there; the theorem covers this range.
+
+\section{Formal statement}\label{sec:formal}
+
+In \cite{FC} the problem is stated as \lean{Arxiv.\guillemotleft 1905.10899\guillemotright.divergence\_for\_p\_lt\_half} (pull request 3675).
+It asks, for $p\in(0,1/2)$ and $\gamma\ge2$, for $n',m'$, a differentiable $L$ on $\R^{n'}\times\R^{m'}$ with monotone, $K$-Lipschitz operator $G$, a saddle point $z^\star$ with $G(z^\star)=0$, and a run of \eqref{eq:simgda} such that no $C>0$ satisfies $\|G(z_T)\|^2\le C/T$ for all $T\ge1$.
+Theorem~\ref{thm:main} with $n'=m'=1$, $K=1$, any $\rho\in A$, $z^\star=0$ and $z_0=(1,0)$ provides this, since $\|G(z_T)\|\to\infty$.
+
+\subsection*{Formalization}
+We have formalized this in Lean~4 with Mathlib.
+The file \texttt{Defs.lean} contains the definitions of the statement file of the pull request verbatim.
+\texttt{Solution.lean} proves \lean{divergence\_for\_p\_lt\_half\_proved}, whose statement is that of \lean{divergence\_for\_p\_lt\_half} verbatim.
+\texttt{CheckAnswer.lean} restates \lean{divergence\_for\_p\_lt\_half} under its own name and checks that the two types agree by \lean{rfl}.
+The proof follows Sections 2--4, with three simplifications that suffice for the formal statement:
+\begin{itemize}
+\item it uses the weaker growth bound $|\Phi_k|\gtrsim k^{1-2p}$, obtained from $\prod(1+x_j)\ge1+\sum x_j$;
+\item it replaces Lemma~\ref{lem:limit} by the explicit bound $|\Lambda(\zeta)-1|\le S/|m_0(\zeta)|$;
+\item it needs only that $|\Phi_k(\rho)|$ is eventually bounded away from $0$, so that $\|G(z_k)\|$ does not tend to $0$.
+\end{itemize}
+Lemma~\ref{lem:unique} is proved from Mathlib's Cauchy theorem for rectangles and its version of Morera's theorem.
+The proofs depend only on the axioms \lean{propext}, \lean{Classical.choice} and \lean{Quot.sound}.
+The Lean files, a reproducible check script and its log are in the repository accompanying this note.
+
+\begin{thebibliography}{9}
+
+\bibitem{FC}
+Google DeepMind, \emph{Formal Conjectures}, \url{https://github.com/google-deepmind/formal-conjectures}; the statement is in \texttt{FormalConjectures/Arxiv/1905.10899/LastIterateConvergence.lean}, pull request 3675 (2026).
+
+\bibitem{RYY}
+E.~K.~Ryu, K.~Yuan and W.~Yin, \emph{ODE analysis of stochastic gradient methods with optimism and anchoring for minimax problems}, arXiv:1905.10899, 2019 (v3, 2020).
+
+\bibitem{Surina}
+A.~Surina, A.~Suggala, G.~Tsoukalas, A.~Kovsharov, S.~Shirobokov, F.~J.~R.~Ruiz, P.~Kohli and S.~Chaudhuri, \emph{An improved last-iterate convergence rate for anchored gradient descent ascent}, arXiv:2604.03782, 2026.
+
+\end{thebibliography}
+
+\end{document}

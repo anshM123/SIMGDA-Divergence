@@ -1,0 +1,9 @@
+p=0.1 gamma=2 rho=1.0: Lambda = -0.0617-0.2693i, |Lambda| = 0.2762, log|Phi_T| = 14735.9, log10|w_T| = inf  (T = 400000)
+p=0.1 gamma=2 rho=0.5: Lambda = +1.9716-0.5893i, |Lambda| = 2.0578, log|Phi_T| = 3776.1, log10|w_T| = inf  (T = 400000)
+p=0.25 gamma=2 rho=1.0: Lambda = -0.0654-0.0579i, |Lambda| = 0.0873, log|Phi_T| = 336.2, log10|w_T| = 144.9  (T = 400000)
+p=0.25 gamma=2 rho=0.5: Lambda = +5.9786+1.1706i, |Lambda| = 6.0922, log|Phi_T| = 69.1, log10|w_T| = 30.8  (T = 400000)
+p=0.25 gamma=5 rho=1.0: Lambda = -0.0159-0.1978i, |Lambda| = 0.1984, log|Phi_T| = 311.8, log10|w_T| = 134.7  (T = 400000)
+p=0.25 gamma=5 rho=0.5: Lambda = +41.6745+54.4626i, |Lambda| = 68.5780, log|Phi_T| = 43.2, log10|w_T| = 20.6  (T = 400000)
+p=0.3 gamma=2 rho=1.0: Lambda = -0.0828+0.0781i, |Lambda| = 0.1139, log|Phi_T| = 88.4, log10|w_T| = 37.5  (T = 400000)
+p=0.3 gamma=2 rho=0.5: Lambda = +7.6550+3.3841i, |Lambda| = 8.3697, log|Phi_T| = 7.9, log10|w_T| = 4.4  (T = 400000)
+exit 0

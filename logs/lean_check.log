@@ -1,0 +1,14 @@
+== formal-conjectures commit: ab0addc45f699bdd0b7cc58efa5140a72f101a9e
+== compiling Uniqueness.lean
+== compiling Defs.lean
+== compiling Growth.lean
+== compiling Analytic.lean
+== compiling Dynamics.lean
+== compiling Solution.lean
+== compiling CheckAnswer.lean (verbatim statement under its original name; type equality by rfl; axioms)
+'Arxiv.«1905.10899».divergence_for_p_lt_half_proved' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Arxiv.«1905.10899».divergence_for_p_lt_half' depends on axioms: [propext, Classical.choice, Quot.sound]
+== forbidden keywords (sorry/admit/native_decide/axiom):
+none
+== done
+== exit 0, 178 s
